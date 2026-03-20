@@ -1,5 +1,6 @@
 import express, { Express } from 'express';
 import './config.js'; // do not remove this line
+import { characterNoteController } from './controllers/charNoteControl.js';
 import { userController } from './controllers/userController.js';
 import { sessionMiddleware } from './sessionConfig.js';
 
@@ -17,6 +18,8 @@ app.use(express.static('public', { extensions: ['html'] }));
 // -- Routes --------------------------------------------------
 // Register your routes below this line
 app.post('/users', userController.register);
+app.post('/notes', characterNoteController.create);
+app.get('/notes/:characterId', characterNoteController.getByCharacter);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server listening on http://localhost:${process.env.PORT}`);
