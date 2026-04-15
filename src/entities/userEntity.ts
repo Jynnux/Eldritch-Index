@@ -1,15 +1,18 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
-import { v7 as uuidv7 } from 'uuid';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('users')
 export class User {
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
   // universally unique identifier; our primary key
-  id: string = uuidv7();
+  id: string;
 
   // email address
   @Column({ unique: true })
   email!: string;
+
+  // username
+  @Column({ unique: true, nullable: true })
+  displayName: string;
 
   // password hash
   @Column()
