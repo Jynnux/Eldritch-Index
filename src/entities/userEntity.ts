@@ -12,7 +12,7 @@ export class User {
 
   // username
   @Column({ unique: true, nullable: true })
-  displayName: string;
+  displayName!: string;
 
   // password hash
   @Column()

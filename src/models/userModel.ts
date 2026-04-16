@@ -25,4 +25,8 @@ export const userModel = {
     const repo = AppDataSource.getRepository(User);
     return await repo.delete({ id: userId });
   },
+  async changeDisplayName(userId: string, newName: string) {
+    const repo = AppDataSource.getRepository(User);
+    return await repo.update({ id: userId }, { displayName: newName });
+  },
 };

@@ -2,6 +2,7 @@ import connectPgSimple from 'connect-pg-simple';
 import 'dotenv/config';
 import express, { Express } from 'express';
 import session from 'express-session';
+import { characterController } from './controllers/characterController.js';
 import { userController } from './controllers/userController.js';
 import { sessionMiddleware } from './sessionConfig.js';
 
@@ -38,6 +39,11 @@ app.post('/login', userController.logIn);
 app.delete('/sessions', userController.logOut);
 app.get('/users/me', userController.getUserProfile);
 app.delete('/users/me', userController.deleteUser);
+app.put('/users/me', userController.changeDisplayName);
+// #### CHARACTER CREATOR ROUTES #### //
+app.post('/characters', characterController.createCharacter);
+app.get('/characters/:id', characterController.getCharacter);
+app.delete('/characters/:id', characterController.deleteCharacter);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server listening on http://localhost:${process.env.PORT}`);
