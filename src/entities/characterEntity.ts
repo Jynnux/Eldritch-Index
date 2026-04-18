@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from './userEntity.js';
 
 @Entity('characters')
@@ -11,12 +11,18 @@ export class Character {
   @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
   user: User;
 
+  @OneToMany('Item', 'character')
+  items: any[];
+
   @Column()
   name!: string;
 
-  @Column({ default: 1 })
-  health!: number;
+  @Column()
+  occupation!: string;
 
   @Column({ default: 1 })
   maxHealth!: number;
+
+  @Column({ default: 1 })
+  currentHealth!: number;
 }

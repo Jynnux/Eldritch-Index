@@ -2,15 +2,22 @@ import { AppDataSource } from '../dataSource.js';
 import { Character } from '../entities/characterEntity.js';
 
 export const characterModel = {
-  async createCharacter(userId: string, name: string, health: number, maxHealth: number) {
+  async createCharacter(
+    userId: string,
+    name: string,
+    occupation: string,
+    currentHealth: number,
+    maxHealth: number,
+  ) {
     // get the repo
     const repo = AppDataSource.getRepository(Character);
     // make the char
     const character = repo.create({
       user: { id: userId },
       name,
-      health,
+      occupation,
       maxHealth,
+      currentHealth,
     });
 
     return await repo.save(character);

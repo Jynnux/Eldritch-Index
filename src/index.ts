@@ -3,6 +3,8 @@ import 'dotenv/config';
 import express, { Express } from 'express';
 import session from 'express-session';
 import { characterController } from './controllers/characterController.js';
+import { itemController } from './controllers/itemController.js';
+import { noteController } from './controllers/noteController.js';
 import { userController } from './controllers/userController.js';
 import { sessionMiddleware } from './sessionConfig.js';
 
@@ -44,6 +46,17 @@ app.put('/users/me', userController.changeDisplayName);
 app.post('/characters', characterController.createCharacter);
 app.get('/characters/:id', characterController.getCharacter);
 app.delete('/characters/:id', characterController.deleteCharacter);
+app.patch('/characters/:id', characterController.updateCharacter);
+// #### INVENTORY ROUTES #### //
+app.post('/characters/:id/items', itemController.addItem);
+app.get('/items', itemController.getInventory);
+app.put('/items/:id', itemController.updateItem);
+app.delete('/characters/:id/items/:id', itemController.deleteItem);
+// #### NOTE ROUTES #### //
+app.post('/characters/:id/notes', noteController.addNote);
+app.get('/notes', noteController.getNotes);
+app.put('/notes/:id', noteController.updateNote);
+app.delete('/characters/:id/notes/:id', noteController.deleteNote);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server listening on http://localhost:${process.env.PORT}`);

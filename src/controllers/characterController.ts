@@ -22,15 +22,16 @@ export const characterController = {
         return;
       }
 
-      const { name, health, maxHealth } = result.data;
+      const { name, occupation, currentHealth, maxHealth } = result.data;
       // get user id to assign users characters
       const userId = req.session.authenticatedUser.userId;
       // NOTE: maybe change default values.
       const character = await characterModel.createCharacter(
         userId,
         name,
-        health ?? 10,
+        occupation,
         maxHealth ?? 10,
+        currentHealth ?? 10,
       );
 
       res.status(201).json(character);
@@ -94,6 +95,42 @@ export const characterController = {
     } catch (err) {
       console.error(err);
       return res.status(500).json('No connection to server.');
+    }
+  },
+  // updateCharacter()
+  //
+  // this updates one character attribute at a time. when using bruno, you must
+  // route it through the character id. then, automatically, the body of the
+  // request will be parsed for individual params to update. so you just pass
+  // in health or occupation, no need to make specific functions for those
+  // things.
+  //
+  // NOTE: if you enter some invalid field or some field that doesn't exist,
+  // it doesn't actually update the db, even if bruno displays like it does.
+  // maybe add some error checking here if we have time.
+  async updateCharacter(req: Request, res: Response) {
+    try {
+      // validation
+      const userId = req.session.authenticatedUser?.userId;
+      if (!userId) return res.status(401).json('Try logging in.');
+
+      const characterId = req.params.id as string;
+
+      const repo = AppDataSource.getRepository(Character);
+
+      const character = await repo.findOne({
+        where: { id: characterId, user: { id: userId } },
+      });
+
+      if (!character) return res.status(404).json('Character not found.');
+      // logic
+      Object.assign(character, req.body);
+      const result = await repo.save(character);
+
+      return res.status(200).json(result);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json('Could not reach server.');
     }
   },
 };
