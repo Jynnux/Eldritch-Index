@@ -5,6 +5,7 @@ import session from 'express-session';
 import { characterController } from './controllers/characterController.js';
 import { itemController } from './controllers/itemController.js';
 import { noteController } from './controllers/noteController.js';
+import { sharingController } from './controllers/sharingController.js';
 import { userController } from './controllers/userController.js';
 import { sessionMiddleware } from './sessionConfig.js';
 
@@ -57,6 +58,8 @@ app.post('/characters/:id/notes', noteController.addNote);
 app.get('/notes', noteController.getNotes);
 app.put('/notes/:id', noteController.updateNote);
 app.delete('/characters/:id/notes/:id', noteController.deleteNote);
+// #### SHARING ROUTES #### //
+app.post('/characters/:id/share', sharingController.shareCharacterWithUser);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server listening on http://localhost:${process.env.PORT}`);

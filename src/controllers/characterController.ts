@@ -45,27 +45,21 @@ export const characterController = {
   // returns a character based on a user's owned characters.
   async getCharacter(req: Request, res: Response) {
     try {
+      // validate first
       const userId = req.session.authenticatedUser?.userId;
       if (!userId) {
         return res.status(401).json('Try logging in.');
       }
 
-      const repo = AppDataSource.getRepository(Character);
-      // TODO: Quick fix--add authentication for this later.
       const characterId = req.params.id as string;
 
-      const character = await repo.findOne({
-        where: {
-          id: characterId,
-          user: { id: userId },
-        },
-      });
+      const { allowed, character } = await characterModel.checkVisibility(userId, characterId);
 
-      if (!character) {
+      if (!allowed) {
         return res.sendStatus(404);
       }
 
-      return res.status(200).json(character);
+      return res.json(character);
     } catch (err) {
       console.error(err);
       res.sendStatus(500).json('No connection to server.');

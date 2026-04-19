@@ -1,5 +1,6 @@
 import { AppDataSource } from '../dataSource.js';
 import { Character } from '../entities/characterEntity.js';
+import { CharacterShare } from '../entities/sharingEntity.js';
 
 export const characterModel = {
   async createCharacter(
@@ -22,6 +23,7 @@ export const characterModel = {
 
     return await repo.save(character);
   },
+
   async deleteCharacter(characterId: string, userId: string) {
     const repo = AppDataSource.getRepository(Character);
 
@@ -31,5 +33,33 @@ export const characterModel = {
     });
 
     return result;
+  },
+  async checkVisibility(userId: string, characterId: string) {
+    const characterRepo = AppDataSource.getRepository(Character);
+    const shareRepo = AppDataSource.getRepository(CharacterShare);
+
+    // check character repo first for user ownership
+    const owned = await characterRepo.findOne({
+      where: {
+        id: characterId,
+        user: { id: userId },
+      },
+    });
+
+    if (owned) return { allowed: true, character: owned };
+
+    // check shared repo to see if a character is shared or not
+    const shared = await shareRepo.findOne({
+      where: {
+        character: { id: characterId },
+        user: { id: userId },
+      },
+      relations: ['character'],
+    });
+
+    if (shared) return { allowed: true, character: shared.character };
+
+    // neither owned nor shared
+    return { allowed: false, character: null };
   },
 };
