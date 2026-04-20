@@ -60,6 +60,7 @@ app.put('/notes/:id', noteController.updateNote);
 app.delete('/characters/:id/notes/:id', noteController.deleteNote);
 // #### SHARING ROUTES #### //
 app.post('/characters/:id/share', sharingController.shareCharacterWithUser);
+app.delete('/characters/:id/share', sharingController.unshareCharacter);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server listening on http://localhost:${process.env.PORT}`);
