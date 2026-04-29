@@ -72,7 +72,7 @@ export const noteController = {
       const parsed = NoteSchema.safeParse(req.body);
 
       if (!parsed.success) {
-        return res.status(400).json(parsed.error.flatten());
+        return res.status(400);
       }
 
       const repo = AppDataSource.getRepository(Note);

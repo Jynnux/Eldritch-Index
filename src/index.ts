@@ -51,12 +51,12 @@ app.delete('/characters/:id', characterController.deleteCharacter);
 app.patch('/characters/:id', characterController.updateCharacter);
 // #### INVENTORY ROUTES #### //
 app.post('/characters/:id/items', itemController.addItem);
-app.get('/items', itemController.getInventory);
+app.get('/characters/:id/items', itemController.getInventory);
 app.put('/items/:id', itemController.updateItem);
 app.delete('/characters/:id/items/:id', itemController.deleteItem);
 // #### NOTE ROUTES #### //
 app.post('/characters/:id/notes', noteController.addNote);
-app.get('/notes', noteController.getNotes);
+app.get('/characters/:id/notes', noteController.getNotes);
 app.put('/notes/:id', noteController.updateNote);
 app.delete('/characters/:id/notes/:id', noteController.deleteNote);
 // #### SHARING ROUTES #### //

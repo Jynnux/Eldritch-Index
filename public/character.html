@@ -1,0 +1,371 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Character Sheet</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+
+  <body>
+    <main class="dashboard-page">
+      <button onclick="window.location.href = '/dashboard.html'">Back to Dashboard</button>
+
+      <section class="character-sheet">
+        <h2>Character</h2>
+        <div class="field-group">
+          <label for="char-name">Name</label>
+          <input id="char-name" />
+        </div>
+
+        <div class="field-group">
+          <label for="char-occupation">Occupation</label>
+          <input id="char-occupation" placeholder="Occupation" />
+        </div>
+
+        <h2>Stats</h2>
+        <div class="field-group">
+          <label for="char-currentHP">Max HP</label>
+          <input id="char-maxHP" type="number" />
+        </div>
+
+        <div class="field-group">
+          <label for="char-currentHP">Current HP</label>
+          <input id="char-currentHP" type="number" />
+        </div>
+
+        <section class="items-section">
+          <h2>Items</h2>
+
+          <div id="items-list"></div>
+
+          <div class="item-create">
+            <input id="item-name" placeholder="Item name" />
+            <input id="item-desc" placeholder="Description" />
+            <button onclick="addItem()">Add Item</button>
+          </div>
+        </section>
+
+        <section class="notes-section">
+          <h2>Notes</h2>
+
+          <div id="notes-list"></div>
+
+          <div class="note-create">
+            <textarea id="note-text" placeholder="Write a note..."></textarea>
+            <button onclick="addNote()">Add Note</button>
+          </div>
+        </section>
+
+        <div class="auth-buttons">
+          <button onclick="saveCharacter()">Save Changes</button>
+          <button onclick="deleteCharacter()">Delete Character</button>
+        </div>
+      </section>
+
+      <script>
+        // this script section is going to be very long because we are rendering a lot on one page.
+        // all the functions should be pretty obvious in their functionality, though.
+
+        // let characterId be null before trying to assign it so we know, if
+        // it's null, there was some database issue.
+        let characterId = null;
+
+        async function loadCharacter() {
+          const params = new URLSearchParams(window.location.search);
+          characterId = params.get('id');
+
+          if (!characterId) {
+            window.location.href = '/dashboard.html';
+            return;
+          }
+
+          const res = await fetch(`/characters/${characterId}`);
+
+          if (!res.ok) {
+            alert('Character not found.');
+            window.location.href = '/dashboard.html';
+            return;
+          }
+
+          const char = await res.json();
+
+          document.getElementById('char-name').value = char.name;
+          document.getElementById('char-occupation').value = char.occupation;
+          document.getElementById('char-currentHP').value = char.currentHealth;
+          document.getElementById('char-maxHP').value = char.maxHealth;
+        }
+
+        async function saveCharacter() {
+          const body = {
+            name: document.getElementById('char-name').value,
+            occupation: document.getElementById('char-occupation').value,
+            currentHealth: Number(document.getElementById('char-currentHP').value),
+            maxHealth: Number(document.getElementById('char-maxHP').value),
+          };
+
+          const res = await fetch(`/characters/${characterId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+
+          if (res.ok) {
+            alert('Saved!');
+          } else {
+            alert('Failed to save.');
+          }
+        }
+
+        async function deleteCharacter() {
+          const confirmed = confirm('Delete this character permanently?');
+
+          if (!confirmed) return;
+
+          const res = await fetch(`/characters/${characterId}`, {
+            method: 'DELETE',
+          });
+
+          if (res.ok) {
+            window.location.href = '/dashboard.html';
+          } else {
+            alert('Failed to delete character.');
+          }
+        }
+
+        async function loadItems() {
+          const res = await fetch(`/characters/${characterId}/items`);
+
+          if (!res.ok) return;
+
+          const items = await res.json();
+
+          const list = document.getElementById('items-list');
+          list.innerHTML = '';
+
+          items.forEach((item) => {
+            const div = document.createElement('div');
+            div.className = 'item-card';
+
+            div.innerHTML = `
+              <div class="item-view" id="view-${item.id}">
+                <strong>${item.name}</strong>
+                <p>${item.description}</p>
+
+                <button onclick="enterEditMode('${item.id}', '${item.name}', \`${item.description}\`)">
+                  Edit
+                </button>
+
+                <button onclick="deleteItem('${item.id}')">
+                  Delete
+                </button>
+              </div>
+
+              <div class="item-edit" id="edit-${item.id}" style="display:none;">
+                <input id="name-${item.id}" value="${item.name}" />
+                <input id="desc-${item.id}" value="${item.description}" />
+
+                <button onclick="saveItem('${item.id}')">Save</button>
+                <button onclick="cancelEdit('${item.id}')">Cancel</button>
+              </div>
+            `;
+
+            list.appendChild(div);
+          });
+        }
+
+        async function addItem() {
+          const name = document.getElementById('item-name').value;
+          const description = document.getElementById('item-desc').value;
+
+          if (!name) return alert('Item needs a name');
+
+          const res = await fetch(`/characters/${characterId}/items`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, description }),
+          });
+
+          if (res.ok) {
+            document.getElementById('item-name').value = '';
+            document.getElementById('item-desc').value = '';
+            loadItems();
+          } else {
+            alert('Failed to add item');
+          }
+        }
+
+        async function deleteItem(itemId) {
+          const res = await fetch(`/characters/${characterId}/items/${itemId}`, {
+            method: 'DELETE',
+          });
+
+          if (res.ok) {
+            loadItems();
+          } else {
+            alert('Failed to delete item');
+          }
+        }
+
+        async function updateItem(itemId) {
+          const newName = prompt('New item name:');
+          const newDesc = prompt('New description:');
+
+          if (!newName) return;
+
+          const res = await fetch(`/items/${itemId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: newName,
+              description: newDesc,
+            }),
+          });
+
+          if (res.ok) {
+            loadItems();
+          } else {
+            alert('Failed to update item');
+          }
+        }
+
+        async function saveItem(itemId) {
+          const name = document.getElementById(`name-${itemId}`).value;
+          const description = document.getElementById(`desc-${itemId}`).value;
+
+          const res = await fetch(`/items/${itemId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name, description }),
+          });
+
+          if (res.ok) {
+            loadItems();
+          } else {
+            alert('Failed to update item');
+          }
+        }
+
+        function enterEditMode(id) {
+          document.getElementById(`view-${id}`).style.display = 'none';
+          document.getElementById(`edit-${id}`).style.display = 'block';
+        }
+
+        function cancelEdit(id) {
+          document.getElementById(`edit-${id}`).style.display = 'none';
+          document.getElementById(`view-${id}`).style.display = 'block';
+        }
+
+        async function loadNotes() {
+          const res = await fetch(`/characters/${characterId}/notes`);
+
+          if (!res.ok) return;
+
+          const notes = await res.json();
+
+          const list = document.getElementById('notes-list');
+          list.innerHTML = '';
+
+          notes.forEach((note) => {
+            const div = document.createElement('div');
+            div.className = 'note-card';
+
+            div.innerHTML = `
+              <div class="note-view" id="note-view-${note.id}">
+                <p>${note.content}</p>
+
+                <button onclick="enterNoteEdit('${note.id}', \`${note.content}\`)">
+                  Edit
+                </button>
+
+                <button onclick="deleteNote('${note.id}')">
+                  Delete
+                </button>
+              </div>
+
+              <div class="note-edit" id="note-edit-${note.id}" style="display:none;">
+                <textarea id="note-input-${note.id}">${note.content}</textarea>
+
+                <button onclick="saveNote('${note.id}')">Save</button>
+                <button onclick="cancelNoteEdit('${note.id}')">Cancel</button>
+              </div>
+            `;
+
+            list.appendChild(div);
+          });
+        }
+
+        async function addNote() {
+          const text = document.getElementById('note-text').value;
+
+          if (!text.trim()) return alert('Note cannot be empty');
+
+          const res = await fetch(`/characters/${characterId}/notes`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content: text }),
+          });
+
+          if (res.ok) {
+            document.getElementById('note-text').value = '';
+            loadNotes();
+          } else {
+            alert('Failed to add note');
+          }
+        }
+
+        function enterNoteEdit(id) {
+          document.getElementById(`note-view-${id}`).style.display = 'none';
+          document.getElementById(`note-edit-${id}`).style.display = 'block';
+        }
+
+        function cancelNoteEdit(id) {
+          document.getElementById(`note-edit-${id}`).style.display = 'none';
+          document.getElementById(`note-view-${id}`).style.display = 'block';
+        }
+
+        async function saveNote(noteId) {
+          const text = document.getElementById(`note-input-${noteId}`).value;
+
+          const res = await fetch(`/notes/${noteId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content: text }),
+          });
+
+          if (res.ok) {
+            loadNotes();
+          } else {
+            alert('Failed to update note');
+          }
+        }
+
+        async function deleteNote(noteId) {
+          const res = await fetch(`/characters/${characterId}/notes/${noteId}`, {
+            method: 'DELETE',
+          });
+
+          if (res.ok) {
+            loadNotes();
+          } else {
+            alert('Failed to delete note');
+          }
+        }
+
+        async function init() {
+          await loadCharacter();
+          await loadItems();
+          await loadNotes();
+        }
+
+        init();
+      </script>
+    </main>
+  </body>
+</html>

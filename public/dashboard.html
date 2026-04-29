@@ -47,7 +47,16 @@
           data.characters.forEach((char) => {
             const card = document.createElement('div');
             card.className = 'character-card';
-            card.textContent = char.name;
+
+            card.innerHTML = `
+              <h3>${char.name}</h3>
+              <p>${char.occupation}</p>
+            `;
+
+            card.onclick = () => {
+              window.location.href = `/character.html?id=${char.id}`;
+            };
+
             grid.appendChild(card);
           });
 

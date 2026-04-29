@@ -33,10 +33,10 @@
         const currentHP = Number(document.getElementById('currentHP').value);
 
         const errorMsg = document.getElementById('error-msg');
-        errorMsg.textContent = "";
+        errorMsg.textContent = '';
 
         if (!name || !occupation) {
-          errorMsg.textContent = "Name and occupation are required.";
+          errorMsg.textContent = 'Name and occupation are required.';
           return;
         }
 
@@ -56,11 +56,11 @@
             window.location.href = '/dashboard.html';
           } else {
             const data = await res.json();
-            errorMsg.textContent = data.message || "Failed to create character.";
+            errorMsg.textContent = data.message || 'Failed to create character.';
           }
         } catch (err) {
           console.error(err);
-          errorMsg.textContent = "Server error.";
+          errorMsg.textContent = 'Server error.';
         }
       }
     </script>
