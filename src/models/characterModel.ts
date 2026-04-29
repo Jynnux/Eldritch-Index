@@ -62,4 +62,23 @@ export const characterModel = {
     // neither owned nor shared
     return { allowed: false, character: null };
   },
+  async getCharactersForUser({
+    userId,
+    limit,
+    offset,
+  }: {
+    userId: string;
+    limit: number;
+    offset: number;
+  }) {
+    const repo = AppDataSource.getRepository(Character);
+
+    const [characters, total] = await repo.findAndCount({
+      where: { user: { id: userId } },
+      take: limit,
+      skip: offset,
+    });
+
+    return { characters, total };
+  }
 };

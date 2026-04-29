@@ -46,6 +46,7 @@ app.put('/users/me', userController.changeDisplayName);
 // #### CHARACTER CREATOR ROUTES #### //
 app.post('/characters', characterController.createCharacter);
 app.get('/characters/:id', characterController.getCharacter);
+app.get('/characters/', characterController.getManyCharacters);
 app.delete('/characters/:id', characterController.deleteCharacter);
 app.patch('/characters/:id', characterController.updateCharacter);
 // #### INVENTORY ROUTES #### //

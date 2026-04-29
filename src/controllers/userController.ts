@@ -56,7 +56,13 @@ export const userController = {
       req.session.authenticatedUser = { userId: user.id, email: user.email };
       req.session.isLoggedIn = true;
 
-      res.sendStatus(200);
+      res.status(200).json({
+        message: "Login successful",
+        user: {
+          id: user.id,
+          email: user.email,
+        }
+      });
     } catch (err) {
       console.error(err);
       res.sendStatus(500);

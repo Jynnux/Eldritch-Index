@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Create Character</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+
+  <body>
+    <main class="character-creator">
+      <div class="center-box">
+        <h1>Create Character</h1>
+
+        <div class="form-fields">
+          <input id="name" placeholder="Name" />
+          <input id="occupation" placeholder="Occupation" />
+          <input id="maxHP" type="number" placeholder="Max HP" />
+          <input id="currentHP" type="number" placeholder="Current HP" />
+        </div>
+
+        <p id="error-msg"></p>
+
+        <div class="auth-buttons">
+          <button onclick="createCharacter()">Create</button>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      async function createCharacter() {
+        const name = document.getElementById('name').value;
+        const occupation = document.getElementById('occupation').value;
+        const maxHP = Number(document.getElementById('maxHP').value);
+        const currentHP = Number(document.getElementById('currentHP').value);
+
+        const errorMsg = document.getElementById('error-msg');
+        errorMsg.textContent = "";
+
+        if (!name || !occupation) {
+          errorMsg.textContent = "Name and occupation are required.";
+          return;
+        }
+
+        try {
+          const res = await fetch('/characters', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name,
+              occupation,
+              maxHealth: maxHP,
+              currentHealth: currentHP,
+            }),
+          });
+
+          if (res.ok) {
+            window.location.href = '/dashboard.html';
+          } else {
+            const data = await res.json();
+            errorMsg.textContent = data.message || "Failed to create character.";
+          }
+        } catch (err) {
+          console.error(err);
+          errorMsg.textContent = "Server error.";
+        }
+      }
+    </script>
+  </body>
+</html>

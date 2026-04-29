@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+
+  <body>
+    <main class="dashboard-page">
+      <h1>Dashboard</h1>
+      <!-- Create Character & Rolling Guide Buttons -->
+      <section class="dashboard-actions">
+        <button onclick="window.location.href = '/characterCreator.html'">Create Character</button>
+        <button>Rolling Guide</button>
+        <button onclick="logout()">Log Out</button>
+      </section>
+
+      <section class="dashboard-filters">
+        <input placeholder="Search characters..." />
+      </section>
+
+      <!-- Filters -->
+
+      <!-- Character Section -->
+      <section class="character-grid"></section>
+
+      <!-- Pages -->
+      <section class="pagination">
+        <button onclick="prevPage()">Prev</button>
+        <span>Page 1</span>
+        <button onclick="nextPage()">Next</button>
+      </section>
+
+      <script>
+        let currentPage = 1;
+        let totalPages = 1;
+
+        async function loadCharacters(page = 1) {
+          const res = await fetch(`/characters?page=${page}&limit=8`);
+          const data = await res.json();
+
+          const grid = document.querySelector('.character-grid');
+          const pageLabel = document.querySelector('.pagination span');
+
+          grid.innerHTML = '';
+
+          data.characters.forEach((char) => {
+            const card = document.createElement('div');
+            card.className = 'character-card';
+            card.textContent = char.name;
+            grid.appendChild(card);
+          });
+
+          currentPage = data.page;
+          totalPages = data.totalPages;
+
+          pageLabel.textContent = `Page ${currentPage} of ${totalPages}`;
+
+          updateButtons();
+        }
+
+        function nextPage() {
+          if (currentPage < totalPages) {
+            loadCharacters(currentPage + 1);
+          }
+        }
+
+        function prevPage() {
+          if (currentPage > 1) {
+            loadCharacters(currentPage - 1);
+          }
+        }
+
+        function updateButtons() {
+          const prev = document.querySelector('.pagination button:first-child');
+          const next = document.querySelector('.pagination button:last-child');
+
+          prev.disabled = currentPage === 1;
+          next.disabled = currentPage === totalPages;
+        }
+
+        loadCharacters(1);
+
+        async function logout() {
+          try {
+            const res = await fetch('/sessions', {
+              method: 'DELETE',
+            });
+
+            if (res.ok) {
+              // redirect to landing page
+              window.location.href = '/index.html';
+            } else {
+              console.error('Logout failed');
+            }
+          } catch (err) {
+            console.error('Error logging out:', err);
+          }
+        }
+      </script>
+    </main>
+  </body>
+</html>

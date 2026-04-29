@@ -62,7 +62,40 @@ export const characterController = {
       return res.json(character);
     } catch (err) {
       console.error(err);
-      res.sendStatus(500).json('No connection to server.');
+      res.status(500).json('No connection to server.');
+    }
+  },
+  // getManyCharacters()
+  //
+  // retrieves 8 characters a user owns at a time, allowing the frontend to
+  // display them in a per-page format. i made this function very quickly so
+  // beware of unexpected behavior.
+  async getManyCharacters(req: Request, res: Response) {
+    try {
+      const userId = req.session.authenticatedUser?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Try logging in." });
+      }
+
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 8;
+      const offset = (page - 1) * limit;
+
+      const { characters, total } = await characterModel.getCharactersForUser({
+        userId,
+        limit,
+        offset,
+      });
+
+      return res.json({
+        characters,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ message: "Failed to fetch characters" });
     }
   },
   // deleteCharacter()
@@ -75,14 +108,14 @@ export const characterController = {
       const userId = req.session.authenticatedUser?.userId;
 
       if (!userId) {
-        return res.sendStatus(401).json('Try logging in.');
+        return res.status(401).json('Try logging in.');
       }
 
       const characterId = req.params.id as string;
       const result = await characterModel.deleteCharacter(characterId, userId);
       // in case nothing changes; i think this can only occur if the character doesn't exist.
       if (result.affected === 0) {
-        return res.sendStatus(404).json('Character not found.');
+        return res.status(404).json('Character not found.');
       }
       // success!!!
       return res.sendStatus(204);
