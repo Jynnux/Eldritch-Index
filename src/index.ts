@@ -2,6 +2,7 @@ import connectPgSimple from 'connect-pg-simple';
 import 'dotenv/config';
 import express, { Express } from 'express';
 import session from 'express-session';
+import './config.js';
 import { characterController } from './controllers/characterController.js';
 import { itemController } from './controllers/itemController.js';
 import { noteController } from './controllers/noteController.js';
