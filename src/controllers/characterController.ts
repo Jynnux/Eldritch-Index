@@ -43,12 +43,12 @@ export const characterController = {
   // getCharacter()
   //
   // returns a character based on a user's owned characters.
-  async getCharacter(req: Request, res: Response) {
+  async getCharacter(req: Request, res: Response): Promise<void> {
     try {
       // validate first
-      const userId = req.session.authenticatedUser?.userId;
+      const userId = req.session.authenticatedUser.userId;
       if (!userId) {
-        return res.status(401).json('Try logging in.');
+        res.status(401).json('Try logging in.');
       }
 
       const characterId = req.params.id as string;
@@ -56,10 +56,10 @@ export const characterController = {
       const { allowed, character } = await characterModel.checkVisibility(userId, characterId);
 
       if (!allowed) {
-        return res.sendStatus(404);
+        res.sendStatus(404);
       }
 
-      return res.json(character);
+      res.json(character);
     } catch (err) {
       console.error(err);
       res.status(500).json('No connection to server.');
@@ -72,9 +72,9 @@ export const characterController = {
   // beware of unexpected behavior.
   async getManyCharacters(req: Request, res: Response) {
     try {
-      const userId = req.session.authenticatedUser?.userId;
+      const userId = req.session.authenticatedUser.userId;
       if (!userId) {
-        return res.status(401).json({ message: "Try logging in." });
+        return res.status(401).json({ message: 'Try logging in.' });
       }
 
       const page = parseInt(req.query.page as string) || 1;
@@ -95,7 +95,7 @@ export const characterController = {
       });
     } catch (err) {
       console.error(err);
-      return res.status(500).json({ message: "Failed to fetch characters" });
+      return res.status(500).json({ message: 'Failed to fetch characters' });
     }
   },
   // deleteCharacter()
@@ -105,7 +105,7 @@ export const characterController = {
   // how our db works we may have to find another solution for this one later.
   async deleteCharacter(req: Request, res: Response) {
     try {
-      const userId = req.session.authenticatedUser?.userId;
+      const userId = req.session.authenticatedUser.userId;
 
       if (!userId) {
         return res.status(401).json('Try logging in.');
@@ -138,7 +138,7 @@ export const characterController = {
   async updateCharacter(req: Request, res: Response) {
     try {
       // validation
-      const userId = req.session.authenticatedUser?.userId;
+      const userId = req.session.authenticatedUser.userId;
       if (!userId) return res.status(401).json('Try logging in.');
 
       const characterId = req.params.id as string;

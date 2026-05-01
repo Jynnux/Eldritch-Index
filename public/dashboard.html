@@ -36,7 +36,7 @@
         let totalPages = 1;
 
         async function loadCharacters(page = 1) {
-          const res = await fetch(`/characters?page=${page}&limit=8`);
+          const res = await fetch(`/api/characters?page=${page}&limit=8`);
           const data = await res.json();
 
           const grid = document.querySelector('.character-grid');
@@ -92,7 +92,7 @@
 
         async function logout() {
           try {
-            const res = await fetch('/sessions', {
+            const res = await fetch('/api/sessions', {
               method: 'DELETE',
             });
 

@@ -78,7 +78,7 @@
             return;
           }
 
-          const res = await fetch(`/characters/${characterId}`);
+          const res = await fetch(`/api/characters/${characterId}`);
 
           if (!res.ok) {
             alert('Character not found.');
@@ -102,7 +102,7 @@
             maxHealth: Number(document.getElementById('char-maxHP').value),
           };
 
-          const res = await fetch(`/characters/${characterId}`, {
+          const res = await fetch(`/api/characters/${characterId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
@@ -120,7 +120,7 @@
 
           if (!confirmed) return;
 
-          const res = await fetch(`/characters/${characterId}`, {
+          const res = await fetch(`/api/characters/${characterId}`, {
             method: 'DELETE',
           });
 
@@ -132,7 +132,7 @@
         }
 
         async function loadItems() {
-          const res = await fetch(`/characters/${characterId}/items`);
+          const res = await fetch(`/api/characters/${characterId}/items`);
 
           if (!res.ok) return;
 
@@ -178,7 +178,7 @@
 
           if (!name) return alert('Item needs a name');
 
-          const res = await fetch(`/characters/${characterId}/items`, {
+          const res = await fetch(`/api/characters/${characterId}/items`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, description }),
@@ -194,7 +194,7 @@
         }
 
         async function deleteItem(itemId) {
-          const res = await fetch(`/characters/${characterId}/items/${itemId}`, {
+          const res = await fetch(`/api/characters/${characterId}/items/${itemId}`, {
             method: 'DELETE',
           });
 
@@ -211,7 +211,7 @@
 
           if (!newName) return;
 
-          const res = await fetch(`/items/${itemId}`, {
+          const res = await fetch(`/api/items/${itemId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -233,7 +233,7 @@
           const name = document.getElementById(`name-${itemId}`).value;
           const description = document.getElementById(`desc-${itemId}`).value;
 
-          const res = await fetch(`/items/${itemId}`, {
+          const res = await fetch(`/api/items/${itemId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -259,7 +259,7 @@
         }
 
         async function loadNotes() {
-          const res = await fetch(`/characters/${characterId}/notes`);
+          const res = await fetch(`/api/characters/${characterId}/notes`);
 
           if (!res.ok) return;
 
@@ -302,7 +302,7 @@
 
           if (!text.trim()) return alert('Note cannot be empty');
 
-          const res = await fetch(`/characters/${characterId}/notes`, {
+          const res = await fetch(`/api/characters/${characterId}/notes`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -331,7 +331,7 @@
         async function saveNote(noteId) {
           const text = document.getElementById(`note-input-${noteId}`).value;
 
-          const res = await fetch(`/notes/${noteId}`, {
+          const res = await fetch(`/api/notes/${noteId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -347,7 +347,7 @@
         }
 
         async function deleteNote(noteId) {
-          const res = await fetch(`/characters/${characterId}/notes/${noteId}`, {
+          const res = await fetch(`/api/characters/${characterId}/notes/${noteId}`, {
             method: 'DELETE',
           });
 

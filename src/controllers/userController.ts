@@ -10,7 +10,7 @@ export const userController = {
   //
   // this function just makes a safeUser variable to return to the session.
   // notably, it removes passwordHash before returning anything.
-  async registerUser(req: Request, res: Response) {
+  async registerUser(req: Request, res: Response): Promise<void> {
     try {
       const { email, displayName, password } = CreateUserSchema.parse(req.body);
       const newUser = await userModel.createUser(email, displayName, password);
@@ -18,10 +18,10 @@ export const userController = {
       res.status(201).json(safeUser);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error });
+        res.status(400).json({ error: error });
       }
       const { type, message } = parseDatabaseError(error);
-      return res.status(500).json({ type: type, error: message });
+      res.status(500).json({ type: type, error: message });
     }
   },
   // logIn()
@@ -53,15 +53,19 @@ export const userController = {
 
       // this line gave me errors when it was used.
       // await req.session.clearSession();
-      req.session.authenticatedUser = { userId: user.id, email: user.email };
+      req.session.authenticatedUser = {
+        userId: user.id,
+        email: user.email,
+        displayName: user.displayName,
+      };
       req.session.isLoggedIn = true;
 
       res.status(200).json({
-        message: "Login successful",
+        message: 'Login successful',
         user: {
           id: user.id,
           email: user.email,
-        }
+        },
       });
     } catch (err) {
       console.error(err);
@@ -113,10 +117,10 @@ export const userController = {
   //
   // deletes a user based on their id. this should absolutely be more detailed
   // than that but we aren't at NASA right now or anything.
-  async deleteUser(req: Request, res: Response) {
+  async deleteUser(req: Request, res: Response): Promise<void> {
     try {
       if (!req.session.authenticatedUser) {
-        return res.status(401).json('Try logging in.');
+        res.status(401).json('Try logging in.');
       }
       // get user ID & delete session
       const userId = req.session.authenticatedUser.userId;
@@ -126,7 +130,6 @@ export const userController = {
         if (err) {
           console.error(err);
           res.sendStatus(500);
-          return;
         }
       });
       res.clearCookie('session');
@@ -140,21 +143,21 @@ export const userController = {
   //
   // changes your display name. we may add other functionality to this function
   // later to change other attributes, but we may not.
-  async changeDisplayName(req: Request, res: Response) {
+  async changeDisplayName(req: Request, res: Response): Promise<void> {
     try {
       if (!req.session.authenticatedUser) {
-        return res.status(401).json('Try logging in.');
+        res.status(401).json('Try logging in.');
       }
       const userId = req.session.authenticatedUser.userId;
       const { newName } = req.body;
 
       if (!newName) {
-        return res.status(400).json('Enter a valid username.');
+        res.status(400).json('Enter a valid username.');
       }
 
       await userModel.changeDisplayName(userId, newName);
 
-      return res.status(201).json('Display name successfully changed.');
+      res.status(201).json('Display name successfully changed.');
     } catch (err) {
       console.error(err);
       res.sendStatus(500);

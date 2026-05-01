@@ -11,7 +11,7 @@ export const noteController = {
   async getNotes(req: Request, res: Response) {
     try {
       if (!req.session.authenticatedUser) {
-        return res.status(401).json('Try logging in.');
+        res.status(401).json('Try logging in.');
       }
 
       const characterId = req.params.id;
@@ -22,9 +22,9 @@ export const noteController = {
         where: { character: { id: characterId } },
       });
 
-      return res.status(200).json(notes);
+      res.status(200).json(notes);
     } catch (err) {
-      return res.status(404).json('Notes not found.');
+      res.status(404).json('Notes not found.');
     }
   },
   // addNote()
@@ -43,7 +43,7 @@ export const noteController = {
       const parsed = NoteSchema.safeParse(req.body);
 
       if (!parsed.success) {
-        return res.status(400).json(parsed.error.flatten());
+        res.status(400);
       }
 
       const note = repo.create({

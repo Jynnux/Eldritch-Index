@@ -27,11 +27,11 @@
               const password = document.getElementById('password').value;
 
               if (!email || !displayName || !password) {
-                alert("Please fill out all fields");
+                alert('Please fill out all fields');
                 return;
               }
 
-              const res = await fetch('/users', {
+              const res = await fetch('/api/users', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, displayName, password }),

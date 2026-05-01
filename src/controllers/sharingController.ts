@@ -10,7 +10,7 @@ export const sharingController = {
   async shareCharacterWithUser(req: Request, res: Response) {
     try {
       // validate
-      const userId = req.session.authenticatedUser?.userId;
+      const userId = req.session.authenticatedUser.userId;
 
       if (!userId) {
         return res.status(401).json('Try logging in.');
@@ -40,16 +40,16 @@ export const sharingController = {
   // unshareCharacter()
   //
   // unshares one character with one user at a time by deleting entry in 'shared' db table.
-  async unshareCharacter(req: Request, res: Response) {
+  async unshareCharacter(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.session.authenticatedUser?.userId;
+      const userId = req.session.authenticatedUser.userId;
       if (!userId) {
-        return res.status(401).json('Try logging in.');
+        res.status(401).json('Try logging in.');
       }
 
       const parsed = ShareCharacterSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json(parsed.error.flatten());
+        res.status(400).json(parsed.error.flatten());
       }
 
       const { targetUserDisplayName } = parsed.data;
@@ -58,7 +58,7 @@ export const sharingController = {
       await characterShareModel.unshareCharacter(characterId, userId, targetUserDisplayName);
     } catch (err) {
       console.error(err);
-      return res.status(500).json('Server issue.');
+      res.status(500).json('Server issue.');
     }
   },
 };
