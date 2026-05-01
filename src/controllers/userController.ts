@@ -41,14 +41,12 @@ export const userController = {
       const user = await userModel.getUserByEmail(email);
       if (!user) {
         req.session.logInAttempts = (req.session.logInAttempts ?? 0) + 1;
-        res.sendStatus(403);
-        return;
+        res.status(403).json({ message: 'Invalid email or password' });
       }
 
       if (!(await argon2.verify(user.passwordHash, password))) {
         req.session.logInAttempts = (req.session.logInAttempts ?? 0) + 1;
-        res.sendStatus(403);
-        return;
+        res.status(403).json({ message: 'Invalid email or password' });
       }
 
       // this line gave me errors when it was used.

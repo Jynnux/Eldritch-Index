@@ -25,6 +25,11 @@ export const characterController = {
       const { name, occupation, currentHealth, maxHealth } = result.data;
       // get user id to assign users characters
       const userId = req.session.authenticatedUser.userId;
+      // validate
+      if (!userId) {
+        res.status(401).json('Try logging in.');
+      }
+
       // NOTE: maybe change default values.
       const character = await characterModel.createCharacter(
         userId,
