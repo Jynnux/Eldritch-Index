@@ -15,7 +15,7 @@ export const userController = {
       const { email, displayName, password } = CreateUserSchema.parse(req.body);
       const newUser = await userModel.createUser(email, displayName, password);
       const { passwordHash, ...safeUser } = newUser;
-      res.status(201).json(safeUser);
+      return res.status(201).json(safeUser);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error });
@@ -53,15 +53,21 @@ export const userController = {
 
       // this line gave me errors when it was used.
       // await req.session.clearSession();
-      req.session.authenticatedUser = { userId: user.id, email: user.email };
+      // this section also gave me errors <- said it was because of displayname, so i added it.
+      req.session.authenticatedUser = {
+        userId: user.id,
+        email: user.email,
+        displayName: user.displayName,
+      };
+
       req.session.isLoggedIn = true;
 
       res.status(200).json({
-        message: "Login successful",
+        message: 'Login successful',
         user: {
           id: user.id,
           email: user.email,
-        }
+        },
       });
     } catch (err) {
       console.error(err);
@@ -130,10 +136,10 @@ export const userController = {
         }
       });
       res.clearCookie('session');
-      res.status(204).json('User successfully deleted.');
+      return res.status(204).json('User successfully deleted.');
     } catch (err) {
       console.error(err);
-      res.sendStatus(500);
+      return res.sendStatus(500);
     }
   },
   // changeDisplayName()
@@ -157,7 +163,7 @@ export const userController = {
       return res.status(201).json('Display name successfully changed.');
     } catch (err) {
       console.error(err);
-      res.sendStatus(500);
+      return res.sendStatus(500);
     }
   },
 };

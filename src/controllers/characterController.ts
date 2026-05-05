@@ -3,6 +3,8 @@ import { AppDataSource } from '../dataSource.js';
 import { Character } from '../entities/characterEntity.js';
 import { characterModel } from '../models/characterModel.js';
 import { CharacterSchema } from '../validators/characterValidator.js';
+import { Pointschema } from '../validators/pointbuyValidator.js';
+import { StatSchema } from '../validators/statValidator.js';
 
 export const characterController = {
   // createCharacter()
@@ -25,6 +27,11 @@ export const characterController = {
       const { name, occupation, currentHealth, maxHealth } = result.data;
       // get user id to assign users characters
       const userId = req.session.authenticatedUser.userId;
+      // validate
+      if (!userId) {
+        res.status(401).json('Try logging in.');
+      }
+
       // NOTE: maybe change default values.
       const character = await characterModel.createCharacter(
         userId,
@@ -43,12 +50,12 @@ export const characterController = {
   // getCharacter()
   //
   // returns a character based on a user's owned characters.
-  async getCharacter(req: Request, res: Response) {
+  async getCharacter(req: Request, res: Response): Promise<void> {
     try {
       // validate first
-      const userId = req.session.authenticatedUser?.userId;
+      const userId = req.session.authenticatedUser.userId;
       if (!userId) {
-        return res.status(401).json('Try logging in.');
+        res.status(401).json('Try logging in.');
       }
 
       const characterId = req.params.id as string;
@@ -56,10 +63,10 @@ export const characterController = {
       const { allowed, character } = await characterModel.checkVisibility(userId, characterId);
 
       if (!allowed) {
-        return res.sendStatus(404);
+        res.sendStatus(404);
       }
 
-      return res.json(character);
+      res.json(character);
     } catch (err) {
       console.error(err);
       res.status(500).json('No connection to server.');
@@ -72,9 +79,9 @@ export const characterController = {
   // beware of unexpected behavior.
   async getManyCharacters(req: Request, res: Response) {
     try {
-      const userId = req.session.authenticatedUser?.userId;
+      const userId = req.session.authenticatedUser.userId;
       if (!userId) {
-        return res.status(401).json({ message: "Try logging in." });
+        return res.status(401).json({ message: 'Try logging in.' });
       }
 
       const page = parseInt(req.query.page as string) || 1;
@@ -95,7 +102,7 @@ export const characterController = {
       });
     } catch (err) {
       console.error(err);
-      return res.status(500).json({ message: "Failed to fetch characters" });
+      return res.status(500).json({ message: 'Failed to fetch characters' });
     }
   },
   // deleteCharacter()
@@ -105,7 +112,7 @@ export const characterController = {
   // how our db works we may have to find another solution for this one later.
   async deleteCharacter(req: Request, res: Response) {
     try {
-      const userId = req.session.authenticatedUser?.userId;
+      const userId = req.session.authenticatedUser.userId;
 
       if (!userId) {
         return res.status(401).json('Try logging in.');
@@ -138,7 +145,7 @@ export const characterController = {
   async updateCharacter(req: Request, res: Response) {
     try {
       // validation
-      const userId = req.session.authenticatedUser?.userId;
+      const userId = req.session.authenticatedUser.userId;
       if (!userId) return res.status(401).json('Try logging in.');
 
       const characterId = req.params.id as string;
@@ -157,6 +164,89 @@ export const characterController = {
       return res.status(200).json(result);
     } catch (err) {
       console.error(err);
+      return res.status(500).json('Could not reach server.');
+    }
+  },
+  // pickStat()
+  //
+  // -- GABRIELLE TAUNTON --
+  // Allows users to pick stat method. Records what's chosen and is meant to direct over to either
+  // pointBuy() or pointRoll() without having either method overlap for the user when creating
+  // their character. Per the action list.
+  async pickStat(req: Request, res: Response) {
+    try {
+      const userId = req.session.authenticatedUser.userId;
+      if (!userId) return res.status(401).json('Try logging in.');
+
+      const characterId = req.params.id as string;
+      const statdata = StatSchema.parse(req.body);
+
+      // Following from choosestatuser()
+      const result = await characterModel.choosestatuser(userId, characterId, statdata.method);
+
+      const { method } = result;
+
+      return res.status(200).json({ method });
+    } catch (error: any) {
+      console.error(error);
+      return res.status(500).json('Could not reach server.');
+    }
+  },
+  // pointBuy()
+  //
+  // -- GABRIELLE TAUNTON --
+  // Allows users to distribute points to stats. This is from a 460 stat total, following from
+  // typical CoC rules. 15 minimum, 90 maximum with stats. Following from similar methods as a
+  // loose reference, utilizing pet (assignment) as well.
+  async pointBuy(req: Request, res: Response) {
+    try {
+      const userId = req.session.authenticatedUser.userId;
+      if (!userId) return res.status(401).json('Try logging in.');
+
+      const characterId = req.params.id as string;
+      const pointdata = Pointschema.parse(req.body);
+
+      const pointmethod = await characterModel.pointbuyuser(
+        characterId,
+        userId,
+        pointdata.numstr,
+        pointdata.numcon,
+        pointdata.numapp,
+        pointdata.numedu,
+        pointdata.numdex,
+        pointdata.numint,
+        pointdata.numsiz,
+        pointdata.numpow,
+      );
+
+      return res.status(200).json(pointmethod);
+    } catch (error: any) {
+      console.error(error);
+      return res.status(500).json('Could not reach server.');
+    }
+  },
+  // rolling()
+  //
+  // -- GT --
+  // Allows users to distribute points to stats. This is from a 460 stat total, following from
+  // typical CoC rules. 15 minimum, 90 maximum with stats. Following from similar methods as a
+  // loose reference, utilizing pet (assignment) as well.
+  async rolling(req: Request, res: Response) {
+    try {
+      const userId = req.session.authenticatedUser.userId;
+      if (!userId) return res.status(401).json('Try logging in.');
+
+      const characterId = req.params.id as string;
+
+      const rollmethod = await characterModel.rollinguser(characterId, userId);
+
+      if (!rollmethod) {
+        return res.status(404).json(rollmethod);
+      }
+
+      return res.status(200).json(rollmethod);
+    } catch (error: any) {
+      console.error(error);
       return res.status(500).json('Could not reach server.');
     }
   },

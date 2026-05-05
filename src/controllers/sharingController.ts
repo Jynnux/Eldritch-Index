@@ -56,6 +56,7 @@ export const sharingController = {
       const characterId = req.params.id as string;
 
       await characterShareModel.unshareCharacter(characterId, userId, targetUserDisplayName);
+      return res.status(204);
     } catch (err) {
       console.error(err);
       return res.status(500).json('Server issue.');

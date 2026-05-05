@@ -1,14 +1,25 @@
 import connectPgSimple from 'connect-pg-simple';
 import session from 'express-session';
+import { Pool } from 'pg';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
 const PostgresStore = connectPgSimple(session);
 
 // Store sessions in PostgreSQL
+
+const pgPool = new Pool({
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT),
+  user: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  ssl: process.env.DB_SSL_MODE === 'require' ? { rejectUnauthorized: false } : false,
+});
+
 const sessionStorage = new PostgresStore({
   createTableIfMissing: true,
-  conString: `postgres://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+  pool: pgPool,
 });
 
 const sessionMiddleware = session({

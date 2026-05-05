@@ -26,6 +26,7 @@ async function sync(): Promise<void> {
   }
 
   const manifest: { files: string[]; delete?: string[] } = await res.json();
+  fs.writeFileSync(path.resolve('sync-manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
   console.log(`Syncing ${manifest.files.length} files...\n`);
 
   for (const file of manifest.files) {
