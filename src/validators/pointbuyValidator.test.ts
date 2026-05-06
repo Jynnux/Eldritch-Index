@@ -5,7 +5,7 @@ import { Pointschema } from './pointbuyValidator.js';
 // others. Describe: When you have several tests for one thing, group them. Nesting.
 describe('point buy validator test', (): void => {
   // it and test does the same thing. We use 'it' inside describe blocks.
-  it('accepts valid point-buy input', () => {
+  it('accepts valid point-buy input', (): void => {
     const data = {
       numstr: 50,
       numcon: 50,
