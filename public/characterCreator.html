@@ -1,0 +1,221 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Create Character</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+
+  <body>
+    <main class="character-creator">
+      <div class="center-box">
+        <h1>Create Character</h1>
+
+        <div class="creator-grid">
+
+        <!-- LEFT SIDE -->
+        <section class="creator-basic">
+          <h2>Character Info</h2>
+
+          <input id="name" placeholder="Name" />
+          <input id="occupation" placeholder="Occupation" />
+
+          <div class="hp-row">
+            <input id="maxHP" type="number" placeholder="Max HP" />
+            <input id="currentHP" type="number" placeholder="Current HP" />
+          </div>
+        </section>
+
+        <!-- RIGHT SIDE -->
+        <section class="creator-stats">
+          <h2>Stats</h2>
+          <h3>Points Remaining: <span id="points-left">340</span></h3>
+
+          <div class="stats-grid">
+
+            <div class="stat-block">
+              <label>STR</label>
+              <button onclick="updateStat('strength', -1)">-</button>
+              <input id="strength" readonly />
+              <button onclick="updateStat('strength', 1)">+</button>
+            </div>
+
+            <div class="stat-block">
+              <label>DEX</label>
+              <button onclick="updateStat('dexterity', -1)">-</button>
+              <input id="dexterity" readonly />
+              <button onclick="updateStat('dexterity', 1)">+</button>
+            </div>
+
+            <div class="stat-block">
+              <label>POW</label>
+              <button onclick="updateStat('power', -1)">-</button>
+              <input id="power" readonly />
+              <button onclick="updateStat('power', 1)">+</button>
+            </div>
+
+            <div class="stat-block">
+              <label>CON</label>
+              <button onclick="updateStat('constitution', -1)">-</button>
+              <input id="constitution" readonly />
+              <button onclick="updateStat('constitution', 1)">+</button>
+            </div>
+
+            <div class="stat-block">
+              <label>APP</label>
+              <button onclick="updateStat('appearance', -1)">-</button>
+              <input id="appearance" readonly />
+              <button onclick="updateStat('appearance', 1)">+</button>
+            </div>
+
+            <div class="stat-block">
+              <label>EDU</label>
+              <button onclick="updateStat('education', -1)">-</button>
+              <input id="education" readonly />
+              <button onclick="updateStat('education', 1)">+</button>
+            </div>
+
+            <div class="stat-block">
+              <label>SIZ</label>
+              <button onclick="updateStat('size', -1)">-</button>
+              <input id="size" readonly />
+              <button onclick="updateStat('size', 1)">+</button>
+            </div>
+
+            <div class="stat-block">
+              <label>INT</label>
+              <button onclick="updateStat('intelligence', -1)">-</button>
+              <input id="intelligence" readonly />
+              <button onclick="updateStat('intelligence', 1)">+</button>
+            </div>
+
+          </div>
+        </section>
+        <div class="creator-actions">
+          <button class="btn-primary" onclick="createCharacter()">
+            Create Character
+          </button>
+
+          <button class="btn-secondary" onclick="cancelCreation()">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+    <script>
+      const BASE_STAT = 15;
+      const MAX_STAT = 90;
+      const TOTAL_POOL = 340;
+
+      const stats = {
+        strength: BASE_STAT,
+        dexterity: BASE_STAT,
+        power: BASE_STAT,
+        constitution: BASE_STAT,
+        appearance: BASE_STAT,
+        education: BASE_STAT,
+        size: BASE_STAT,
+        intelligence: BASE_STAT,
+      };
+
+      let pointsLeft = TOTAL_POOL;
+      
+      async function createCharacter() {
+        const errorMsg = document.getElementById('error-msg');
+
+        const name = document.getElementById('name').value.trim();
+        const occupation = document.getElementById('occupation').value.trim();
+        const maxHealth = Number(document.getElementById('maxHP').value);
+        const currentHealth = Number(document.getElementById('currentHP').value);
+
+        // basic validation
+        if (!name || !occupation) {
+          errorMsg.textContent = 'Name and occupation are required.';
+          return;
+        }
+
+        // optional: enforce leftover points = 0 (classic CoC rule feel)
+        if (pointsLeft !== 0) {
+          errorMsg.textContent = `You must spend all points. Remaining: ${pointsLeft}`;
+          return;
+        }
+
+        const payload = {
+          name,
+          occupation,
+          maxHealth,
+          currentHealth,
+
+          strength: stats.strength,
+          dexterity: stats.dexterity,
+          power: stats.power,
+          constitution: stats.constitution,
+          appearance: stats.appearance,
+          education: stats.education,
+          size: stats.size,
+          intelligence: stats.intelligence,
+        };
+
+        try {
+          const res = await fetch('/api/characters', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (res.ok) {
+            window.location.href = '/dashboard.html';
+          } else {
+            const data = await res.json();
+            errorMsg.textContent = data.message || 'Failed to create character.';
+          }
+        } catch (err) {
+          console.error(err);
+          errorMsg.textContent = 'Server error.';
+        }
+      }
+
+      function getSpent(statValue) {
+        return statValue - BASE_STAT;
+      }
+
+      function updateStat(stat, delta) {
+      const current = stats[stat];
+      const next = current + delta;
+
+      // enforce min/max
+      if (next < BASE_STAT || next > MAX_STAT) return;
+
+      // calculate cost difference
+      const newSpent = next - BASE_STAT;
+      const oldSpent = current - BASE_STAT;
+      const costChange = newSpent - oldSpent;
+
+      // prevent overspending
+      if (pointsLeft - costChange < 0) return;
+
+      stats[stat] = next;
+      pointsLeft -= costChange;
+
+      renderStats();
+    }
+
+    function cancelCreation() {
+      const confirmExit = confirm('Discard this character?');
+
+      if (!confirmExit) return;
+
+      window.location.href = '/dashboard.html';
+    }
+
+    function renderStats() {
+      document.getElementById('points-left').textContent = pointsLeft;
+
+      Object.keys(stats).forEach((stat) => {
+        document.getElementById(stat).value = stats[stat];
+      });
+    }
+    </script>
+  </body>
+</html>

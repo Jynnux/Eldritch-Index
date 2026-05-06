@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <main class="welcome-page">
+      <div class="auth-card">
+        <div class="center-box">
+          <h1>Sign Up</h1>
+
+          <div class="form-fields">
+            <input id="email" placeholder="email" />
+            <input id="displayName" placeholder="displayName" />
+            <input id="password" placeholder="password" />
+          </div>
+
+          <div class="auth-buttons">
+            <button onclick="signup()">Create Account</button>
+          </div>
+
+          <script>
+            async function signup() {
+              const email = document.getElementById('email').value;
+              const displayName = document.getElementById('displayName').value;
+              const password = document.getElementById('password').value;
+
+              if (!email || !displayName || !password) {
+                alert('Please fill out all fields');
+                return;
+              }
+
+              const res = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, displayName, password }),
+              });
+
+              const data = await res.json();
+
+              if (!res.ok) {
+                setStatus(data?.message || 'Login failed', true);
+                return;
+              }
+
+              window.location.href = '/dashboard.html';
+            }
+          </script>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
