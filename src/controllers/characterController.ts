@@ -7,7 +7,7 @@ import { CharacterSchema } from '../validators/characterValidator.js';
 export const characterController = {
   // createCharacter()
   //
-  // creates a character. TODO: add important CoC stats later.
+  // Creates a character with a name, occupation, and stats.
   async createCharacter(req: Request, res: Response): Promise<void> {
     try {
       if (!req.session.authenticatedUser) {
@@ -22,12 +22,52 @@ export const characterController = {
         return;
       }
 
-      const { name, occupation, currentHealth, maxHealth } = result.data;
+      const {
+        name,
+        occupation,
+        currentHealth,
+        maxHealth,
+        strength,
+        dexterity,
+        power,
+        constitution,
+        appearance,
+        education,
+        size,
+        intelligence,
+      } = result.data;
+
+      const stats = [
+        strength,
+        dexterity,
+        power,
+        constitution,
+        appearance,
+        education,
+        size,
+        intelligence,
+      ];
+
+      // enforce bounds
+      for (const s of stats) {
+        if (s < 15 || s > 90) {
+          res.status(400).json({ message: 'Stats must be between 15 and 90' });
+        }
+      }
+
+      // enforce total pool (460 above base 15)
+      const totalSpent = stats.reduce((sum, val) => sum + (val - 15), 0);
+
+      if (totalSpent > 460) {
+        res.status(400).json({ message: 'Stat points exceed 460 limit' });
+      }
+
       // get user id to assign users characters
       const userId = req.session.authenticatedUser.userId;
       // validate
       if (!userId) {
         res.status(401).json('Try logging in.');
+        return;
       }
 
       // NOTE: maybe change default values.
@@ -35,8 +75,16 @@ export const characterController = {
         userId,
         name,
         occupation,
-        maxHealth ?? 10,
-        currentHealth ?? 10,
+        maxHealth ?? 1,
+        currentHealth ?? 1,
+        strength ?? 15,
+        dexterity ?? 15,
+        power ?? 15,
+        constitution ?? 15,
+        appearance ?? 15,
+        education ?? 15,
+        size ?? 15,
+        intelligence ?? 15,
       );
 
       res.status(201).json(character);

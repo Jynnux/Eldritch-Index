@@ -39,6 +39,11 @@
 
               const data = await res.json();
 
+              if (!res.ok) {
+                setStatus(data?.message || 'Login failed', true);
+                return;
+              }
+
               window.location.href = '/dashboard.html';
             }
           </script>

@@ -22,14 +22,57 @@
         </div>
 
         <h2>Stats</h2>
-        <div class="field-group">
-          <label for="char-currentHP">Max HP</label>
-          <input id="char-maxHP" type="number" />
-        </div>
 
-        <div class="field-group">
-          <label for="char-currentHP">Current HP</label>
-          <input id="char-currentHP" type="number" />
+        <div class="stats-grid">
+          <div class="field-group">
+            <label for="char-maxHP">Max HP</label>
+            <input id="char-maxHP" type="number" />
+          </div>
+
+          <div class="field-group">
+            <label for="char-currentHP">Current HP</label>
+            <input id="char-currentHP" type="number" />
+          </div>
+
+          <div class="field-group">
+            <label for="char-strength">Strength</label>
+            <input id="char-strength" type="number" />
+          </div>
+
+          <div class="field-group">
+            <label for="char-dexterity">Dexterity</label>
+            <input id="char-dexterity" type="number" />
+          </div>
+
+          <div class="field-group">
+            <label for="char-power">Power</label>
+            <input id="char-power" type="number" />
+          </div>
+
+          <div class="field-group">
+            <label for="char-constitution">Constitution</label>
+            <input id="char-constitution" type="number" />
+          </div>
+
+          <div class="field-group">
+            <label for="char-appearance">Appearance</label>
+            <input id="char-appearance" type="number" />
+          </div>
+
+          <div class="field-group">
+            <label for="char-education">Education</label>
+            <input id="char-education" type="number" />
+          </div>
+
+          <div class="field-group">
+            <label for="char-size">Size</label>
+            <input id="char-size" type="number" />
+          </div>
+
+          <div class="field-group">
+            <label for="char-intelligence">Intelligence</label>
+            <input id="char-intelligence" type="number" />
+          </div>
         </div>
 
         <section class="items-section">
@@ -88,18 +131,38 @@
 
           const char = await res.json();
 
+          // input fields
           document.getElementById('char-name').value = char.name;
           document.getElementById('char-occupation').value = char.occupation;
           document.getElementById('char-currentHP').value = char.currentHealth;
           document.getElementById('char-maxHP').value = char.maxHealth;
+          // core stats
+          document.getElementById('char-strength').value = char.strength;
+          document.getElementById('char-dexterity').value = char.dexterity;
+          document.getElementById('char-power').value = char.power;
+          document.getElementById('char-constitution').value = char.constitution;
+          document.getElementById('char-appearance').value = char.appearance;
+          document.getElementById('char-education').value = char.education;
+          document.getElementById('char-size').value = char.size;
+          document.getElementById('char-intelligence').value = char.intelligence;
         }
 
         async function saveCharacter() {
           const body = {
+            // trackers
             name: document.getElementById('char-name').value,
             occupation: document.getElementById('char-occupation').value,
             currentHealth: Number(document.getElementById('char-currentHP').value),
             maxHealth: Number(document.getElementById('char-maxHP').value),
+            // stats
+            strength: Number(document.getElementById('char-strength').value),
+            dexterity: Number(document.getElementById('char-dexterity').value),
+            power: Number(document.getElementById('char-power').value),
+            constitution: Number(document.getElementById('char-constitution').value),
+            appearance: Number(document.getElementById('char-appearance').value),
+            education: Number(document.getElementById('char-education').value),
+            size: Number(document.getElementById('char-size').value),
+            intelligence: Number(document.getElementById('char-intelligence').value),
           };
 
           const res = await fetch(`/api/characters/${characterId}`, {

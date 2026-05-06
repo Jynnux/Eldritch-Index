@@ -4,11 +4,21 @@ import { CharacterShare } from '../entities/sharingEntity.js';
 
 export const characterModel = {
   async createCharacter(
+    // trackers/input fields
     userId: string,
     name: string,
     occupation: string,
     currentHealth: number,
     maxHealth: number,
+    // core stats
+    strength: number,
+    dexterity: number,
+    power: number,
+    constitution: number,
+    appearance: number,
+    education: number,
+    size: number,
+    intelligence: number,
   ) {
     // get the repo
     const repo = AppDataSource.getRepository(Character);
@@ -19,6 +29,14 @@ export const characterModel = {
       occupation,
       maxHealth,
       currentHealth,
+      strength,
+      dexterity,
+      power,
+      constitution,
+      appearance,
+      education,
+      size,
+      intelligence,
     });
 
     return await repo.save(character);
@@ -80,5 +98,5 @@ export const characterModel = {
     });
 
     return { characters, total };
-  }
+  },
 };

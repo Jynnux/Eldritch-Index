@@ -68,14 +68,15 @@
 //   console.log(`Server listening on http://localhost:${process.env.PORT}`);
 // });
 
+import 'dotenv/config';
 import express, { Express } from 'express';
-import './config.js'; // do not remove this line
+import './config.js';
 import { characterController } from './controllers/characterController.js';
 import { itemController } from './controllers/itemController.js';
 import { noteController } from './controllers/noteController.js';
 import { sharingController } from './controllers/sharingController.js';
 import { userController } from './controllers/userController.js';
-import { sessionMiddleware } from './sessionConfig.js';
+import { sessionMiddleware } from './sessionConfigOld.js';
 
 const app: Express = express();
 

@@ -29,6 +29,7 @@ export class Character {
   @Column()
   occupation!: string;
 
+  // -- GABRIELLE TAUNTON --
   // maximum health for a character; maybe finess this into making max and
   // current health equal during character creation but idk.
   @Column({ default: 1 })
@@ -37,4 +38,28 @@ export class Character {
   // current health
   @Column({ default: 1 })
   currentHealth!: number;
+
+  @Column({ default: 1 })
+  strength!: number;
+
+  @Column({ default: 1 })
+  dexterity!: number;
+
+  @Column({ default: 1 })
+  power!: number;
+
+  @Column({ default: 1 })
+  constitution!: number;
+
+  @Column({ default: 1 })
+  appearance!: number;
+
+  @Column({ default: 1 })
+  education!: number;
+
+  @Column({ default: 1 })
+  intelligence!: number;
+
+  @Column({ default: 1 })
+  size!: number;
 }
